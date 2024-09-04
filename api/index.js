@@ -3,8 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
-
-const API_KEY = process.env.GEMINI_API_KEY;
+const API_KEY = process.env.OPENAI_API_KEY; // Replace with your Gemini API key
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
 app.use(bodyParser.json());
@@ -12,29 +12,20 @@ app.use(cors());
 
 const getOptimizedCode = async (code, language) => {
   try {
-    const prompt = `I have the following code that performs a specific task in ${language}. Could you analyze the code and provide a more efficient algorithm that accomplishes the same task but with better performance? Please optimize the algorithm, provide the improved code, and explain why this new algorithm is more efficient. Here is the code: ${code}`;
+  const genAI = new GoogleGenerativeAI("AIzaSyA4F4cWYwpCFCM0ZVNT6W2ghOGx3C8lijw");
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const response = await axios.post(
-      'https://api.example.com/v1/generate', // Replace with actual API endpoint
-      {
-        prompt: prompt,
-        model: "gemini-1.5-flash", // Replace with the correct model
-        max_tokens: 100,
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json',
-        }
-      }
-    );
+  const prompt = "I have the following code that performs a specific task in"+language+". Could you analyze the code and provide a more efficient algorithm that accomplishes the same task but with better performance? Please optimize the algorithm, provide the improved code, and explain why this new algorithm is more efficient.Here is the code:"+code+"Replace the existing algorithm with the most optimal one for the given task, and explain the improvements made.";
 
-    return response.data.choices[0].text; // Update according to Gemini's response structure
+  const result = await model.generateContent(prompt);
+  console.log(result.response.text());
+  return result.response.text(); // Update according to Gemini's response structure
   } catch (error) {
     console.error("Error: ", error.response ? error.response.data : error.message);
     return code; // Fallback to original code
   }
 };
+
 
 app.post('/analyze', async (req, res) => {
   const { code, language } = req.body;
