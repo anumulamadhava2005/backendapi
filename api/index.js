@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
-const API_KEY = process.env.OPENAI_API_KEY; // Replace with your Gemini API key
+const API_KEY = process.env.GEMINI_API_KEY; // Replace with your Gemini API key
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const app = express();
@@ -12,7 +12,7 @@ app.use(cors());
 
 const getOptimizedCode = async (code, language) => {
   try {
-  const genAI = new GoogleGenerativeAI("AIzaSyA4F4cWYwpCFCM0ZVNT6W2ghOGx3C8lijw");
+  const genAI = new GoogleGenerativeAI(API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = "I have the following code that performs a specific task in"+language+". Could you analyze the code and provide a more efficient algorithm that accomplishes the same task but with better performance? Please optimize the algorithm, provide the improved code, and explain why this new algorithm is more efficient.Here is the code:"+code+"Replace the existing algorithm with the most optimal one for the given task, and explain the improvements made.";
